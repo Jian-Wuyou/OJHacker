@@ -264,9 +264,10 @@ async def share_ko_lang(ctx, uid):
   try:
     uid = int(uid)
   except Exception:
-    await ctx.channel.send("Invalid UID. The syntax for sharing is:\n\
-    `!share_ko_lang <uid>`\
-    ")
+    await ctx.channel.send(
+      "Invalid UID. The syntax for sharing is:\n"
+      "`!share_ko_lang <uid>`"
+    )
     return
 
   try:
@@ -328,9 +329,10 @@ async def delete_tc(ctx):
   try:
     uid = int(inp[0])
   except ValueError:
-    await ctx.channel.send("The syntax for deletion is:\n\
-      `!delete_tc <uid>`\
-    ")
+    await ctx.channel.send(
+      "The syntax for deletion is:\n"
+      "`!delete_tc <uid>`"
+    )
     return
 
   OJ_msg = f"There exists no test case with UID {uid}"
