@@ -7,7 +7,7 @@ from discord.ext import commands
 
 import auxi as aux
 import constants as cnst
-import generators as gen
+# import generators as gen
 import images
 import testcases as tc
 
@@ -66,18 +66,18 @@ RANDOMERS = {
     non,
     non,
     non,
-    gen.genLE07,
-    gen.genLE08,
-    gen.genLE09
+    non,
+    non,
+    non
   ],
   "PA": [
     non,
     non,
     non,
     non,
-    gen.genPA04,
-    gen.genPA05,
-    gen.genPA06
+    non,
+    non,
+    non
   ],
   "MP": [
     non,
