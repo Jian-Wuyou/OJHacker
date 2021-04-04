@@ -17,56 +17,6 @@ client = discord.Client()
 # =========== SHORTHAND COMMANDS =========== #
 @bot.event
 async def on_message(msg):
-  class MiniContext:
-    """
-    A discord.ext.commands.context.Context but with only message and channel as atrbitutes
-    """
-
-    def __init__(self, x):
-      self.message = x
-      self.channel = x.channel
-
-  if msg.content.startswith('!ptc'):
-    try:
-      msg.content = "!penge_tc" + msg.content[4:]
-      ctx = MiniContext(msg)
-      await penge_tc(ctx)
-      return
-    except Exception:
-      print(f"Error at trying !pt\n{ctx}")
-  elif msg.content.startswith('!pr'):
-    try:
-      msg.content = "!penge_random" + msg.content[3:]
-      ctx = MiniContext(msg)
-      await penge_random(ctx)
-      return
-    except Exception:
-      print(f"Error at trying !pr\n{ctx}")
-  elif msg.content.startswith('!skl'):
-    try:
-      msg.content = "!share_ko_lang" + msg.content[4:]
-      ctx = MiniContext(msg)
-      await share_ko_lang(ctx)
-      return
-    except Exception:
-      print(f"Error at trying !skl\n{ctx}")
-  elif msg.content.startswith('!it'):
-    try:
-      msg.content = "!insert_tc" + msg.content[3:]
-      ctx = MiniContext(msg)
-      await insert_tc(ctx)
-      return
-    except Exception:
-      print(f"Error at trying !it\n{ctx}")
-  elif msg.content.startswith('!tn'):
-    try:
-      msg.content = "!tcs_nga" + msg.content[3:]
-      ctx = MiniContext(msg)
-      await tcs_nga(ctx)
-      return
-    except Exception:
-      print(f"Error at trying !tn\n{ctx}")
-
   await bot.process_commands(msg)
 
 
@@ -136,8 +86,8 @@ RANDOMERS = {
 }
 
 # ======= FOR INSERTING TEST CASES =========== #
-@bot.command()
-async def insert_tc(ctx):
+@bot.command(aliases=['it'])
+async def insert_tc(ctx, *inp):
   """Inserts a new test case into the system.
 
   Syntax:
@@ -145,10 +95,7 @@ async def insert_tc(ctx):
     !it <LE/PA/MP><problem #> <test case label>
   """
 
-  msg = ctx.message.content
   auth = ctx.message.author
-
-  inp = "".join(msg.split("!insert_tc ", 1)).split(maxsplit=1)
 
   is_ok, typ, idx, name = await aux.get_inputs(ctx, inp)
 
@@ -174,8 +121,8 @@ async def insert_tc(ctx):
     await ctx.channel.send("Testcase ignored!")
 
 # ======== PANG-DM NG TEST CASES ========= #
-@bot.command()
-async def penge_tc(ctx):
+@bot.command(aliases=['ptc'])
+async def penge_tc(ctx, *inp):
   """DMs all the stored test cases for a certain problem.
 
   Syntax:
@@ -183,10 +130,7 @@ async def penge_tc(ctx):
     !ptc <LE/PA/MP><problem #>
   """
 
-  msg = ctx.message.content
   author = ctx.message.author
-
-  inp = "".join(msg.split("!penge_tc ", 1)).split(maxsplit=1)
 
   is_ok, typ, idx, name = await aux.get_inputs(ctx, inp)
 
@@ -207,8 +151,8 @@ async def penge_tc(ctx):
     await ctx["channel"].send("DM SENT!")
 
 # ========= RANDOM GENERATOR ========== #
-@bot.command()
-async def penge_random(ctx):
+@bot.command(aliases=['pr'])
+async def penge_random(ctx, *inp):
   """DMs a randomly generated test case with the correct output.
 
   Syntax:
@@ -216,10 +160,7 @@ async def penge_random(ctx):
     !pr <LE/PA/MP><problem #>
   """
 
-  msg = ctx.message.content
   author = ctx.message.author
-
-  inp = "".join(msg.split("!penge_random ", 1)).split(maxsplit=1)
 
   is_ok, typ, idx, name = await aux.get_inputs(ctx, inp)
 
@@ -252,12 +193,12 @@ async def penge_random(ctx):
   await ctx.channel.send(OJ_msg)
 
 # ======== Share mo lang yung tc sa channel ====== #
-@bot.command()
+@bot.command(aliases=['skl'])
 async def share_ko_lang(ctx, uid):
   """Sends the test case with a given UID.
 
   Syntax:
-    !penge_random <uid>
+    !share_ko_lang <uid>
     !skl <uid>
   """
 
@@ -279,8 +220,8 @@ async def share_ko_lang(ctx, uid):
   await aux.print_tc(ctx, typ, idx, io, ctx.channel.send)
 
 # ========= Prints the available testcases ======= #
-@bot.command()
-async def tcs_nga(ctx):
+@bot.command(aliases=['tn'])
+async def tcs_nga(ctx, *inp):
   """Shows a list of all stored test case for a certain problem.
 
   Syntax:
@@ -288,10 +229,7 @@ async def tcs_nga(ctx):
     !tn <LE/PA/MP><problem #>
   """
 
-  msg = ctx.message.content
-  inp = "".join(msg.split("!tcs_nga ", 1)).split(maxsplit=1)
-
-  is_ok, typ, idx, name = await aux.get_inputs(ctx,inp)
+  is_ok, typ, idx, name = await aux.get_inputs(ctx, inp)
 
   if not is_ok:
     return

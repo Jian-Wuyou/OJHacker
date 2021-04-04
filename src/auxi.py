@@ -4,8 +4,9 @@ All of the functions used by the bot, but are not directly bot
 commands or server functions are stored here.
 """
 
-import discord
 import time
+
+import discord
 
 import constants as cnst
 
@@ -74,11 +75,9 @@ async def print_tc(ctx, typ, idx, tcs, op):
     A function that tells where to send the resulting string
   """
 
-  to_printA = f"**UID#{tcs[3]} {typ}{idx}: {tcs[0]}**\n\n"
-  to_printB = f"INPUT\n```python\n{tcs[1]}\n```"
-  to_printC = f"OUTPUT\n```python\n{tcs[2]}\n```"
-
-  await op(to_printA + to_printB + to_printC)
+  await op(f"**UID#{tcs[3]} {typ}{idx}: {tcs[0]}**\n\n"
+           f"INPUT\n```python\n{tcs[1]}\n```\n"
+           f"OUTPUT\n```python\n{tcs[2]}\n```")
 
 
 async def get_inputs(ctx, inp):
