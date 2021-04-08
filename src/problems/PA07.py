@@ -24,8 +24,19 @@ def solve(inp):
     prod = lambda a: a[0] * a[1]
     answers = []
     for _ in range(int(next(_input))):
-        # Code goes here, removed to keep it private
-        pass
+        x: int = 0
+        command_queue = [next(_input).strip() for j in range(int(next(_input)))]
+        eval_stack = list()
+        for command in command_queue:
+            if command.startswith('for'):
+                eval_stack.append([0, int(command[3:])])
+                continue
+            change = prod(eval_stack.pop()) if command.startswith('end') else 1
+            if eval_stack:
+                eval_stack[-1][0] += change
+            else:
+                x += change
+        answers.append(x if x <= 1000 else 'ERROR')
     return answers
 
 def generate(*, N: int = 5, l: int = 20, chance_for: float = 0.4,

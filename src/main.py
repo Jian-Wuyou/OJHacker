@@ -1,34 +1,26 @@
-import configparser
 import os
 
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from config import Config
+
 # Load .env and initialize environment variables
 load_dotenv()
 
-# Load config.ini
-currentPath = os.path.dirname(os.path.realpath(__file__))
-configs = configparser.ConfigParser()
-configs.read(currentPath + "/config.ini")
-
-parsed_config = {
-    'admin_users' : set(int(i) for i in configs["General"]["adminUsers"].split(',')),
-    'allowed_guilds' : set(int(i) for i in configs["General"]["allowedGuilds"].split(',')),
-    'command_prefix' : [i.strip() for i in configs["General"]["commandPrefix"].split(',')]
-}
+# Config data class
+config = Config()
 
 TOKEN = os.getenv('TOKEN')
 
 intents = discord.Intents.all()
 bot = commands.Bot(
-    command_prefix=commands.when_mentioned_or(*['!']),
+    command_prefix=commands.when_mentioned_or(*config.command_prefixes),
     case_insensitive=True,
     intents=intents
 )
 
-loaded_cogs = []
 
 @bot.event
 async def on_message(msg: discord.Message):
@@ -41,12 +33,11 @@ async def on_ready():
     bot.remove_command("help")
 
     # Load select cogs in folder /cogs
-    cogs_to_load = ['Config', 'Generators']
+    cogs_to_load = ['Generators']
     for cog_name in cogs_to_load:
         try:
             bot.load_extension(f'cogs.{cog_name}')
-            loaded_cogs.append(cog_name)
-            print(f"Loaded cog: cogs.{cog_name}")
+            print(f"Loaded: cogs.{cog_name}")
         except (commands.ExtensionFailed, commands.NoEntryPointError):
             print(f"There was an issue while loading cogs.{cog_name}.")
 
@@ -68,7 +59,7 @@ async def extension(ctx: commands.context.Context, option, ext=None):
     """
 
     # Check if user is in adminUsers
-    if ctx.author.id not in admin_users:
+    if ctx.author.id not in config.admin_users:
         await ctx.send(f"You do not have permission to {option} extensions.")
         return
 
@@ -87,7 +78,7 @@ async def extension(ctx: commands.context.Context, option, ext=None):
         # Prompt usage method if option is wrong
         else:
             await ctx.send(
-                f"Usage: `{command_prefix[0]}extension <option> <extension>`\n"
+                f"Usage: `{config.command_prefix[0]}extension <option> <extension>`\n"
                 "Options: `list, load, unload, reload`"
             )
             return
@@ -106,7 +97,8 @@ async def extension(ctx: commands.context.Context, option, ext=None):
         return
 
     # Success message
-    await ctx.send(f"{ext} extension {option.upper()}ED.")
+    print(f'Loaded: cogs.{ext}')
+    await ctx.send(f"{ext} extension {option}ed.")
 
 
 def main():
