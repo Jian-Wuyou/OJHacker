@@ -12,6 +12,8 @@ class ReplitDatabase(commands.Cog, name="Database"):
     """Database cog for use with repl.it
 
     Required methods:
+        is_loaded()
+
         insert_testcase(
             uid: int,
             problem_type: str,
@@ -41,8 +43,10 @@ class ReplitDatabase(commands.Cog, name="Database"):
 
     def __init__(self, bot):
         self.bot = bot
-        self.db = db
         self.problem_types = {'LE', 'PA', 'MP'}
+    
+    def is_loaded(self):
+        return db is not None
 
     def insert_testcase(
         self,
@@ -56,16 +60,17 @@ class ReplitDatabase(commands.Cog, name="Database"):
         """Inserts the test case into the database.
 
         Parameters
+        ----------
         uid : int
-        The unique identification number of the test case
+            The unique identification number of the test case
         problem_type : str
-        Can either be "LE", "PA", or "MP" and tells the type of problem
+            Can either be "LE", "PA", or "MP" and tells the type of problem
         problem_id : int
-        The problem number. It should be typecasted to str (for some reason related sa db)
+            The problem number. It should be typecasted to str (for some reason related sa db)
         description : str
-        The label / description for the inserted test case
-        testcase_input, testcase_output : str
-        Contains information on the test cases
+            The label / description for the inserted test case
+            testcase_input, testcase_output : str
+            Contains information on the test cases
         """
         problem_id = str(problem_id)
         if problem_type not in self.problem_types:
