@@ -41,7 +41,7 @@ class ReplitDatabase(commands.Cog, name="Database"):
         get_id()
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.problem_types = {'LE', 'PA', 'MP'}
     
@@ -104,7 +104,7 @@ class ReplitDatabase(commands.Cog, name="Database"):
 
         return db[problem_type][problem_id]
 
-    def delete_problem(self, problem_type, problem_id):
+    def delete_problem(self, problem_type: str, problem_id: int):
         if problem_type not in db or problem_id not in db[problem_type]:
             return
 
@@ -113,7 +113,7 @@ class ReplitDatabase(commands.Cog, name="Database"):
             del db[testcase[3]]
         del db[problem_type][problem_id]
 
-    def get_entry(self, uid):
+    def get_entry(self, uid: int):
         if uid not in db:
             print(f"UID#{uid} is not in the database.")
             return None
@@ -132,7 +132,7 @@ class ReplitDatabase(commands.Cog, name="Database"):
         del db[uid]
         return None
 
-    def delete_entry(self, uid):
+    def delete_entry(self, uid: int):
         if uid not in db:
             print(f"UID#{uid} is not in the database.")
             return False
