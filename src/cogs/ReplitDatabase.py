@@ -44,9 +44,20 @@ class ReplitDatabase(commands.Cog, name="Database"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.problem_types = {'LE', 'PA', 'MP'}
-    
+
     def is_loaded(self):
         return db is not None
+
+    def has_problem(self, problem_type, problem_id):
+        if not self.is_loaded():
+            return
+
+        if problem_type not in db or problem_id not in db[problem_type]:
+            return False
+        if not db[problem_type][problem_id]:
+            return False
+        return True
+
 
     def insert_testcase(
         self,
@@ -72,6 +83,9 @@ class ReplitDatabase(commands.Cog, name="Database"):
             testcase_input, testcase_output : str
             Contains information on the test cases
         """
+        if not self.is_loaded():
+            return
+
         problem_id = str(problem_id)
         if problem_type not in self.problem_types:
             print(f"Invalid problem type '{problem_type}'.")
@@ -92,10 +106,15 @@ class ReplitDatabase(commands.Cog, name="Database"):
             f"Successfully added testcase {problem_type}{problem_id} (uid: {uid}) '{description}'")
 
     def erase_db(self):
+        if not self.is_loaded():
+            return
         for i in db:
             del db[i]
 
     def get_problem(self, problem_type: str, problem_id: int):
+        if not self.is_loaded():
+            return
+
         problem_id = str(problem_id)
 
         if problem_type not in db or problem_id not in db[problem_type]:
@@ -105,6 +124,9 @@ class ReplitDatabase(commands.Cog, name="Database"):
         return db[problem_type][problem_id]
 
     def delete_problem(self, problem_type: str, problem_id: int):
+        if not self.is_loaded():
+            return
+
         if problem_type not in db or problem_id not in db[problem_type]:
             return
 
@@ -114,6 +136,9 @@ class ReplitDatabase(commands.Cog, name="Database"):
         del db[problem_type][problem_id]
 
     def get_entry(self, uid: int):
+        if not self.is_loaded():
+            return
+
         if uid not in db:
             print(f"UID#{uid} is not in the database.")
             return None
@@ -133,6 +158,9 @@ class ReplitDatabase(commands.Cog, name="Database"):
         return None
 
     def delete_entry(self, uid: int):
+        if not self.is_loaded():
+            return
+
         if uid not in db:
             print(f"UID#{uid} is not in the database.")
             return False
@@ -150,6 +178,9 @@ class ReplitDatabase(commands.Cog, name="Database"):
         return False
 
     def get_id(self):
+        if not self.is_loaded():
+            return
+
         res = db.setdefault('id', 0)
         db['id'] += 1
         return res

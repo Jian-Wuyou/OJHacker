@@ -6,6 +6,9 @@ import discord
 class Embeds:
     author = {
         'name': 'OJ Hacker',
+    }
+
+    thumbnail = {
         'url': 'https://cdn.discordapp.com/avatars/824228153480052746'
                '/d422b4a513ea7ba71f1bb0839edc1fb0.png?size=128'
     }
@@ -13,11 +16,12 @@ class Embeds:
     instructions: discord.Embed = discord.Embed.from_dict({
         'title': 'List of Commands:',
         'author': author,
+        'thumbnail': thumbnail,
         'description': '~ use this to access its features',
         'color': 7379967,
         'type': 'rich',
         'fields': [
-            {'inline': False, 
+            {'inline': False,
             'name': '1. !insert_tc (or !it) {LE/PA/MP}{number} {label}',
             'value': '- insert a test case for a specific problem'},
             {'inline': False,
@@ -40,6 +44,7 @@ class Embeds:
     no_testcases: discord.Embed = discord.Embed.from_dict({
         'title': 'No Testcases Yet',
         'author': author,
+        'thumbnail': thumbnail,
         'description': '~ with the possible following reasons:',
         'color': 7379967,
         'type': 'rich',
