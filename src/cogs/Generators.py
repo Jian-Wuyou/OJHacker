@@ -4,7 +4,7 @@ from typing import Callable, Any, Union
 
 from discord.ext import commands
 
-from config import Config
+from utils.config import Config
 
 
 class Generators(commands.Cog):
