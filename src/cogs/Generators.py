@@ -8,20 +8,17 @@ from config import Config
 
 
 class Generators(commands.Cog):
-    config = Config()
-
     def __init__(self, bot: commands.Bot):
         self.bot: commands.Bot
         self.problems: dict[str, dict[int, Any]]
 
         self.bot = bot
-        self.config = Config()
         self.problems = {'LE': dict(), 'PA': dict(), 'MP': dict()}
         self.load_all_problems()
 
     def load_all_problems(self):
         importlib.invalidate_caches()
-        problem_path = path.join(self.config.base_path, 'problems')
+        problem_path = path.join(Config.base_path, 'problems')
         for filename in listdir(problem_path):
             if not filename.endswith('.py'):
                 continue
@@ -98,7 +95,7 @@ class Generators(commands.Cog):
         testcase = self.generate(problem_type, problem_id)
         await ctx.send(f'```{testcase}```')
 
-    @config.is_allowed_admin_commands()
+    @Config.is_allowed_admin_commands()
     @commands.command(aliases=['load_testcase'])
     async def load_problem(self, ctx: commands.Context, *arg: str):
         """Invoke to load testcases added on runtime.
@@ -136,7 +133,7 @@ class Generators(commands.Cog):
             return
         await ctx.send(f'Testcases for {problem_name} successfully loaded.')
 
-    @config.is_allowed_admin_commands()
+    @Config.is_allowed_admin_commands()
     @commands.command(aliases=['reload_testcase'])
     async def reload_problem(self, ctx: commands.Context, *arg: str):
         """Invoke to reload testcases modified on runtime.

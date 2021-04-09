@@ -9,14 +9,11 @@ from config import Config
 # Load .env and initialize environment variables
 load_dotenv()
 
-# Config data class
-config = Config()
-
 TOKEN = os.getenv('TOKEN')
 
 intents = discord.Intents.all()
 bot = commands.Bot(
-    command_prefix=commands.when_mentioned_or(*config.command_prefixes),
+    command_prefix=commands.when_mentioned_or(*Config.command_prefixes),
     case_insensitive=True,
     intents=intents
 )
@@ -58,8 +55,8 @@ async def extension(ctx: commands.context.Context, option, ext=None):
     - Only allowable if user is adminUser.
     """
 
-    # Check if user is in adminUsers
-    if ctx.author.id not in config.admin_users:
+    # Check if user is in admin_users
+    if ctx.author.id not in Config.admin_users:
         await ctx.send(f"You do not have permission to {option} extensions.")
         return
 
@@ -78,7 +75,7 @@ async def extension(ctx: commands.context.Context, option, ext=None):
         # Prompt usage method if option is wrong
         else:
             await ctx.send(
-                f"Usage: `{config.command_prefix[0]}extension <option> <extension>`\n"
+                f"Usage: `{Config.command_prefix[0]}extension <option> <extension>`\n"
                 "Options: `list, load, unload, reload`"
             )
             return
@@ -101,9 +98,5 @@ async def extension(ctx: commands.context.Context, option, ext=None):
     await ctx.send(f"{ext} extension {option}ed.")
 
 
-def main():
-    bot.run(TOKEN)
-
-
 if __name__ == "__main__":
-    main()
+    bot.run(TOKEN)

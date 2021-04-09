@@ -3,137 +3,152 @@
 The functions that interacts with replit's builtin database named "db".
 """
 
+
 from replit import db
-import discord
 from discord.ext import commands
 
 
-class TestCasesReplit(commands.Cog, name="Database"):
+class ReplitDatabase(commands.Cog, name="Database"):
+    """Database cog for use with repl.it
+
+    Required methods:
+        insert_testcase(
+            uid: int,
+            problem_type: str,
+            problem_id: int,
+            description: str,
+            testcase_input: str,
+            testcase_output: str
+        )
+
+        erase_db()
+
+        get_problem(
+            problem_type: str,
+            problem_id: int
+        )
+
+        delete_problem(
+            problem_type: str,
+            problem_id: int
+        )
+
+        get_entry(uid: int)
+        delete_entry(uid: int)
+
+        get_id()
+    """
+
     def __init__(self, bot):
         self.bot = bot
         self.db = db
+        self.problem_types = {'LE', 'PA', 'MP'}
 
-    def insert_testcase(self, uid, typ, idx, name, tc_in, tc_out):
+    def insert_testcase(
+        self,
+        uid: int,
+        problem_type: str,
+        problem_id: int,
+        description: str,
+        testcase_input: str,
+        testcase_output: str
+    ):
         """Inserts the test case into the database.
 
         Parameters
         uid : int
         The unique identification number of the test case
-        typ : str
+        problem_type : str
         Can either be "LE", "PA", or "MP" and tells the type of problem
-        idx : int
+        problem_id : int
         The problem number. It should be typecasted to str (for some reason related sa db)
-        name : str
+        description : str
         The label / description for the inserted test case
-        tc_in, tc_out : str
+        testcase_input, testcase_output : str
         Contains information on the test cases
         """
-        idx = str(idx)
+        problem_id = str(problem_id)
+        if problem_type not in self.problem_types:
+            print(f"Invalid problem type '{problem_type}'.")
+            return
 
-        if typ not in db.keys():
-            print(f"ADDING {typ} TO DB")
-            db[typ] = dict()
-        temp_db = db[typ]
+        if problem_type not in db:
+            print(f"Adding problem type '{problem_type}' to db.")
 
-        if idx not in temp_db.keys():
-            print(f"ADDING {idx} to {typ}")
-            temp_db[idx] = [[name, tc_in, tc_out, uid]]
-            db[uid] = (typ, idx)
-            db[typ] = temp_db
-            temp_db = db[typ]
-            if idx not in temp_db.keys():
-                print(
-                    f"SHIIIIIIIIT. Database cannot insert {uid} {typ} {idx} {name}.")
-            else:
-                print("NICEEEEEEEEEEE. Testcase successfully inserted!")
-        else:
-            temp_db = db[typ]
-            temp_db[idx].append([name, tc_in, tc_out, uid])
-            db[uid] = (typ, idx)
-            db[typ] = temp_db
+        problems = db.setdefault(problem_type, dict())
+
+        if problem_id not in problems:
+            print(f"Adding problem id '{problem_type}{problem_id}' to db.")
+
+        problem = problems.setdefault(problem_id, list())
+        problem.append([description, testcase_input, testcase_output, uid])
+        db[uid] = (problem_type, problem_id)
+        print(
+            f"Successfully added testcase {problem_type}{problem_id} (uid: {uid}) '{description}'")
 
     def erase_db(self):
-        keys = [*db.keys()]
-        for x in keys:
-        del db[x]
+        for i in db:
+            del db[i]
 
-    def get_all(self, typ, idx):
-        idx = str(idx)
-        if typ not in db.keys():
-            print(f"NO TYP {typ} in DB")
-            return []
+    def get_problem(self, problem_type: str, problem_id: int):
+        problem_id = str(problem_id)
 
-        temp_db = db[typ]
-        if idx not in temp_db.keys():
-            print(f"NO IDX {idx} in {typ}")
-            return []
+        if problem_type not in db or problem_id not in db[problem_type]:
+            print(f"Problem '{problem_type}{problem_id}' is not in db.")
+            return None
 
-        return temp_db[idx]
+        return db[problem_type][problem_id]
 
-    def get_id(self):
-        if "id" not in db.keys():
-            db["id"] = 0
-        res = db["id"]
-        db["id"] += 1
-        return res
+    def delete_problem(self, problem_type, problem_id):
+        if problem_type not in db or problem_id not in db[problem_type]:
+            return
+
+        for testcase in db[problem_type][problem_id]:
+            # delete UID from database
+            del db[testcase[3]]
+        del db[problem_type][problem_id]
 
     def get_entry(self, uid):
-        try:
-            typ, idx = db[uid]
-        except Exception:
-            print(f"Test case with UID {uid} has no typ or idx.")
-            return
-        try:
-            temp_db = db[typ]
-            for x in temp_db[idx]:
-                if x[3] == uid:
-                    io = x
-                    break
-            return typ, idx, io
-        except Exception:
-            print(f"Cannot access problem {uid} but it exists.")
-            return
+        if uid not in db:
+            print(f"UID#{uid} is not in the database.")
+            return None
+
+        problem_type, problem_id = db[uid]
+        if problem_type not in db or problem_id not in db[problem_type]:
+            print(f"UID#{uid} references a non-existent testcase, deleting...")
+            del db[uid]
+            return None
+
+        for testcase in db[problem_type][problem_id]:
+            if testcase[3] == uid:
+                return [problem_type, problem_id, testcase]
+
+        print(f"UID#{uid} references a non-existent testcase, deleting...")
+        del db[uid]
+        return None
 
     def delete_entry(self, uid):
-        print(*db.keys())
-        try:
-            typ, idx = db[uid]
-            print(f"AT {typ}{idx}")
-            for i, problem  in enumerate(db[typ][idx]):
-                if problem[3] == uid:
-                    temp_db = db[typ]
-                    del temp_db[idx][i]
-                    db[typ] = temp_db
-                    del db[uid]
-                    return True
-        except Exception:
-            print(f"Can't find {uid} in UID Database")
-            for typ in ['LE', 'PA']:
-                if typ not in db.keys():
-                    continue
-                temp_db = db[typ]
-                for idx in range(9):
-                    if str(idx) not in temp_db:
-                        continue
-                    print(typ, idx, temp_db[str(idx)])
-                    print(type(uid))
-                    for i, problem in enumerate(temp_db[str(idx)]):
-                        if problem[i][3] == uid:
-                            del problem[i]
-                            db[typ] = temp_db
-                            return True
+        if uid not in db:
+            print(f"UID#{uid} is not in the database.")
             return False
+
+        problem_type, problem_id = db[uid]
+        if problem_type not in db or problem_id not in db[problem_type]:
+            print(f"UID#{uid} references a non-existent testcase, deleting...")
+            del db[uid]
+            return False
+
+        for i, testcase in enumerate(db[problem_type][problem_id]):
+            if testcase[3] == uid:
+                del db[problem_type][problem_id][i]
+                return True
         return False
 
-    def delete_row(self, typ, idx):
-        try:
-            temp_db = db[typ]
-            for x in temp_db[idx]:
-                del db[x[3]]
-            del temp_db[idx]
-            db[db] = temp_db
-        except Exception:
-            raise IndexError
+    def get_id(self):
+        res = db.setdefault('id', 0)
+        db['id'] += 1
+        return res
+
 
 def setup(bot):
     bot.add_cog(ReplitDatabase(bot))
