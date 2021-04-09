@@ -16,6 +16,11 @@ class Generators(commands.Cog):
         self.problems = {'LE': dict(), 'PA': dict(), 'MP': dict()}
         self.load_all_problems()
 
+    def has_problem(self, problem_type, problem_id):
+        if problem_type not in self.problems or problem_id not in self.problems[problem_type]:
+            return False
+        return True
+
     def load_all_problems(self):
         importlib.invalidate_caches()
         problem_path = path.join(Config.base_path, 'problems')
