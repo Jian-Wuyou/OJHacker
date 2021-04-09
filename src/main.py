@@ -30,7 +30,7 @@ async def on_ready():
     bot.remove_command("help")
 
     # Load select cogs in folder /cogs
-    cogs_to_load = ['Generators']
+    cogs_to_load = ['Generators', 'ReplitDatabase']
     for cog_name in cogs_to_load:
         try:
             bot.load_extension(f'cogs.{cog_name}')

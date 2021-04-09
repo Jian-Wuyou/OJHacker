@@ -34,11 +34,8 @@ class Generators(commands.Cog):
                 print('Loaded:', module)
             except (ModuleNotFoundError, ImportError):
                 print('Failed:', module)
-                continue
 
-
-    def generate(self, problem_type: str, problem_id: Union[str, int])\
-                -> Union[None, tuple[list[str], list[str]]]:
+    async def generate(self, problem_type: str, problem_id: int, *, ctx: commands.Context = None):
         """
         Parameters
         ----------
@@ -49,36 +46,51 @@ class Generators(commands.Cog):
             Problem ID must either be an integer or a string that is
             convertible to an integer
         """
-        if isinstance(problem_id, str) and not problem_id.isdigit():
-            print(f'Invalid problem ID given. (type: "{problem_type}", id: "{problem_id}")')
-            return
-        problem_id = int(problem_id)
+        problem_id = str(problem_id)
 
-        problem = self.problems.get(problem_type, None)
-        if problem is None:
-            print(f'Invalid problem type given. (type: "{problem_type}", id: "{problem_id}")')
-            return
+        error_message = None
+        if problem_type not in self.problems:
+            error_message = 'Invalid problem type given.'
 
-        problem = problem.get(problem_id, None)
-        if problem is None:
-            print(f'Problem does not yet exist. (type: "{problem_type}", id: "{problem_id}")')
-            return
+        if not problem_id.isdigit():
+            error_message = 'Invalid problem id.'
+
+        if problem_id not in self.problems[problem_type]:
+            error_message = 'Problem does not exist yet.'
+
+        if error_message:
+            error_message += f' `(type: "{problem_type}", id: "{problem_id}")`'
+            if ctx:
+                await ctx.send(error_message)
+            else:
+                print(error_message)
+            return None
+
+        problem = self.problems[problem_type][problem_id]
 
         generate: Callable[..., list[str]]
-        solve: Callable[[Union[list[str], str, None]], list[Union[str, int]]]
+        solve: Callable[[Union[list[str], str]], list[Union[str, int]]]
 
         generate = getattr(problem, 'generate', None)
         solve = getattr(problem, 'solve', None)
 
         if generate is None:
-            print(f'There is an internal issue with the problem.'
-                  f'(type: "{problem_type}", id: "{problem_id}")')
-            return
+            error_message = (f'The problem exists but does not have a generator. '
+                             f'(type: "{problem_type}", id: "{problem_id}")')
+            if ctx:
+                await ctx.send(error_message)
+            else:
+                print(error_message)
+            return None
 
         tc_input = generate()
         tc_answer = []
-        if solve is not None:
-            tc_answer = solve(tc_input)
+        try:
+            if solve is not None:
+                tc_answer = solve(tc_input)
+        except StopIteration:
+            error_message = (f'The problem exists but the solver could not solve the generated'
+                             f'input. (type: "{problem_type}", id: "{problem_id}")')
 
         return (tc_input, tc_answer)
 
@@ -92,7 +104,7 @@ class Generators(commands.Cog):
             return
         problem_id = int(problem_id)
 
-        testcase = self.generate(problem_type, problem_id)
+        testcase = await self.generate(problem_type, problem_id)
         await ctx.send(f'```{testcase}```')
 
     @Config.is_allowed_admin_commands()
