@@ -9,9 +9,13 @@ class Config:
     admin_roles: dict[int, set[int]]
     allowed_guilds: set[int]
 
+    emojis = {'thumbs_up': '\uFFFD'}
+
     command_prefixes = ['!', '$']
 
-    base_path = path.dirname(path.realpath(__file__))
+    testcase_types = {'LE', 'PA', 'MP'}
+
+    base_path = path.abspath(path.join(path.dirname(path.realpath(__file__)), '..'))
 
     admin_users = {
         546398120960065547  # Jian
