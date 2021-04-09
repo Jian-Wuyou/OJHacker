@@ -4,7 +4,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from config import Config
+from utils.embeds import Embeds
+from utils.config import Config
 
 # Load .env and initialize environment variables
 load_dotenv()
@@ -30,13 +31,14 @@ async def on_ready():
     bot.remove_command("help")
 
     # Load select cogs in folder /cogs
-    cogs_to_load = ['Generators', 'ReplitDatabase']
+    cogs_to_load = ['Generators', 'ReplitDatabase', 'Testcases']
     for cog_name in cogs_to_load:
         try:
             bot.load_extension(f'cogs.{cog_name}')
             print(f"Loaded: cogs.{cog_name}")
-        except (commands.ExtensionFailed, commands.NoEntryPointError):
+        except (commands.ExtensionFailed, commands.NoEntryPointError) as e:
             print(f"There was an issue while loading cogs.{cog_name}.")
+            print(e)
 
     print(f'{bot.user} has connected to Discord!')
 
@@ -80,17 +82,21 @@ async def extension(ctx: commands.context.Context, option, ext=None):
             )
             return
 
-    except (commands.ExtensionFailed, commands.NoEntryPointError):
+    except (commands.ExtensionFailed, commands.NoEntryPointError) as e:
         await ctx.send(f"There was an issue with loading the `{ext}` extension.")
+        print(e)
         return
-    except commands.ExtensionNotFound:
+    except commands.ExtensionNotFound as e:
         await ctx.send(f"The `{ext}` extension does not exist.")
+        print(e)
         return
-    except commands.ExtensionAlreadyLoaded:
+    except commands.ExtensionAlreadyLoaded as e:
         await ctx.send(f"The `{ext}` extension is already loaded.")
+        print(e)
         return
-    except commands.ExtensionNotLoaded:
+    except commands.ExtensionNotLoaded as e:
         await ctx.send(f"The `{ext}` extension is not yet loaded.")
+        print(e)
         return
 
     # Success message
